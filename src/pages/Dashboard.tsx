@@ -107,7 +107,7 @@ export default function Dashboard() {
               <Button
                 variant="link"
                 className="p-0 h-auto text-orange-700 font-semibold mt-2"
-                onClick={() => navigate("/booking?specialty=" + encodeURIComponent(healthAlert.suggested_specialty))}
+                onClick={() => navigate("/insurance?query=" + encodeURIComponent(healthAlert.suggested_specialty))}
               >
                 Book {healthAlert.suggested_specialty} Appointment →
               </Button>

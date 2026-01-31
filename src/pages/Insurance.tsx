@@ -9,18 +9,28 @@ import { useNavigate } from "react-router-dom";
 import { generateAIResponse } from "@/lib/keywordsai";
 import { ZocdocSearch, SearchCriteria } from "@/components/insurance/ZocdocSearch";
 import { extendedMockDoctors, symptomSpecialtyMap } from "@/lib/mockData";
+import { useSearchParams } from "react-router-dom";
 
 export default function Insurance() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   // -- Search State --
   const [searchCriteria, setSearchCriteria] = useState<SearchCriteria>({
-    query: "",
+    query: searchParams.get("query") || "",
     zip: "",
     carrierId: "",
     planId: ""
   });
   const [isSearching, setIsSearching] = useState(false);
+
+  // Sync URL params to State (if they change later)
+  useEffect(() => {
+    const q = searchParams.get("query");
+    if (q) {
+      setSearchCriteria(prev => ({ ...prev, query: q }));
+    }
+  }, [searchParams]);
 
   // -- Advocacy State --
   const [denialText, setDenialText] = useState("");
