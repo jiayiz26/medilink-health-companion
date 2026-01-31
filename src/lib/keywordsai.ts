@@ -1,74 +1,61 @@
-import { SYSTEM_PROMPTS } from '../config/prompts';
+// UPDATED: Now communicating with local Python backend
+// Original config/prompts are now handled by the Agent on the backend side theoretically,
+// but for now we are just hitting the backend /chat endpoint which proxies to the Agent.
 
-const KEYWORDS_AI_URL = "https://api.keywordsai.co/api/v1/chat/completions";
-const API_KEY = import.meta.env.VITE_KEYWORDS_AI_KEY;
+const BACKEND_URL = "http://127.0.0.1:8000/chat";
 
 export async function generateAIResponse(
     messages: { role: string; content: string }[],
     agentType: 'TRIAGE' | 'RECOVERY',
     userId: string = "demo_user"
 ) {
-    const systemPrompt = SYSTEM_PROMPTS[agentType];
-
-    // CRITICAL: Use Gemini models, not GPT
-    const model = agentType === 'TRIAGE'
-        ? 'gemini-2.5-flash'       // Fast + accurate for triage
-        : 'gemini-flash-latest';    // Cheapest for simple Q&A
+    // Extract the latest user message to send to the backend
+    const lastMessage = messages[messages.length - 1];
+    const messageContent = lastMessage?.content || "";
 
     try {
-        const response = await fetch(KEYWORDS_AI_URL, {
+        const response = await fetch(BACKEND_URL, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${API_KEY}`,
             },
             body: JSON.stringify({
-                model: model,
-                messages: [
-                    { role: "system", content: systemPrompt },
-                    ...messages
-                ],
-                stream: false,
-                customer_identifier: userId,
-                thread_identifier: `thread_${Date.now()}`,
-                prompt_name: `${agentType.toLowerCase()}_agent_v1`,
-                metadata: {
-                    agent_type: agentType,
-                    environment: "hackathon_demo",
-                    model_provider: "google",
-                    timestamp: new Date().toISOString()
-                }
+                message: messageContent,
+                agent_type: agentType,
+                role: "user"
             }),
         });
 
         if (!response.ok) {
-            throw new Error(`API error: ${response.status}`);
+            throw new Error(`Backend error: ${response.status}`);
         }
 
         const data = await response.json();
+        const reply = data.reply;
 
+        // Parse JSON for TRIAGE agent if necessary
+        // Note: The backend Agent must be configured to return JSON for this to work
         if (agentType === 'TRIAGE') {
             try {
-                const content = data.choices[0].message.content
+                const content = reply
                     .replace(/```json\n?/g, '')
                     .replace(/```\n?/g, '')
                     .trim();
                 return JSON.parse(content);
             } catch (e) {
-                console.warn("Failed to parse JSON, using fallback", e);
+                console.warn("Failed to parse triage JSON from backend:", e);
                 return {
                     severity: "routine",
-                    recommendation: "Please consult a healthcare provider.",
-                    response: data.choices[0].message.content,
+                    recommendation: "Please consult with a healthcare provider.",
+                    response: reply,
                     suggested_specialty: "General Practice"
                 };
             }
         }
 
-        return data.choices[0].message.content;
-
+        return reply;
     } catch (error) {
-        console.error("AI Error:", error);
+        console.error("Backend Connection Error:", error);
         return null;
     }
 }
