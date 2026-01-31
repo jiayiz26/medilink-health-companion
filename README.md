@@ -2,6 +2,7 @@
 
 **Smart Triage. Instant Clarity. Professional Care.**
 
+Navigating the U.S. healthcare system is often a maze of uncertainty—from triaging urgent symptoms to deciphering complex insurance billing. Combined with broader financial pressures like housing and debt, healthcare stress can be overwhelming.
 MediLink is an AI-powered medical assistant built during the **UIUC Hackathon 2026**. It helps users bridge the gap between uncertainty and professional medical advice by providing real-time symptom analysis and urgency triaging.
 
 ---
