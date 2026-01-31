@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { AppointmentCard } from "@/components/dashboard/AppointmentCard";
 import { MedicationCalendar } from "@/components/dashboard/MedicationCalendar";
 import { QuickStats } from "@/components/dashboard/QuickStats";
+import { ProfileSwitcher, profiles, type Profile } from "@/components/dashboard/ProfileSwitcher";
 import { Button } from "@/components/ui/button";
 import { MessageCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -37,18 +39,33 @@ const mockAppointments = [
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const [currentProfile, setCurrentProfile] = useState<Profile>(profiles[0]);
+
+  const handleProfileChange = (profile: Profile) => {
+    setCurrentProfile(profile);
+  };
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
-            Welcome back, Alex
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Here's your health overview for today
-          </p>
+          <div className="flex items-center gap-2 mb-1">
+            <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
+              Welcome back, {currentProfile.name}
+            </h1>
+          </div>
+          <div className="flex items-center gap-3">
+            <p className="text-muted-foreground">
+              {currentProfile.isOwn
+                ? "Here's your health overview for today"
+                : `Viewing ${currentProfile.relationship.toLowerCase()}'s health overview`}
+            </p>
+            <ProfileSwitcher
+              currentProfile={currentProfile}
+              onProfileChange={handleProfileChange}
+            />
+          </div>
         </div>
         <Button onClick={() => navigate("/symptoms")} className="gap-2">
           <MessageCircle className="h-4 w-4" />
