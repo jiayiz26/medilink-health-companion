@@ -9,6 +9,7 @@ import {
   Menu,
   X,
   Activity,
+  Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ const navItems = [
   { title: "Booking", url: "/booking", icon: Calendar },
   { title: "Insurance", url: "/insurance", icon: Shield },
   { title: "Recovery", url: "/recovery", icon: HeartPulse },
+  { title: "Care Circle", url: "/family", icon: Users },
 ];
 
 export function AppSidebar() {

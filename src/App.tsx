@@ -9,6 +9,7 @@ import Symptoms from "./pages/Symptoms";
 import Booking from "./pages/Booking";
 import Insurance from "./pages/Insurance";
 import Recovery from "./pages/Recovery";
+import FamilyAccess from "./pages/FamilyAccess";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/booking" element={<Booking />} />
             <Route path="/insurance" element={<Insurance />} />
             <Route path="/recovery" element={<Recovery />} />
+            <Route path="/family" element={<FamilyAccess />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AppLayout>
