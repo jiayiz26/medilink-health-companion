@@ -6,7 +6,7 @@ const BACKEND_URL = "http://127.0.0.1:8000/chat";
 
 export async function generateAIResponse(
     messages: { role: string; content: string }[],
-    agentType: 'TRIAGE' | 'RECOVERY',
+    agentType: 'TRIAGE' | 'RECOVERY' | 'BILLING',
     userId: string = "demo_user"
 ) {
     // Extract the latest user message to send to the backend

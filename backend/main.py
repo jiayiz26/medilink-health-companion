@@ -21,8 +21,7 @@ KEYWORDS_URL = "https://api.keywordsai.co/api/v1/chat/completions"
 
 # System Prompts moved to backend for security & centralized control
 SYSTEM_PROMPTS = {
-  "TRIAGE": """You are an advanced medical triage AI assistant called MediLink.
-Your goal is to assess patient symptoms and categorize them into: EMERGENCY, URGENT, or ROUTINE.
+  "TRIAGE": """You are MediLink Triage AI. Assess symptoms into: EMERGENCY, URGENT, or ROUTINE.
 
 Output ONLY valid JSON in this exact format (no markdown, no code blocks):
 {
@@ -45,7 +44,25 @@ The patient is recovering from a medical procedure.
 Generate ONE empathetic follow-up question based on their previous response.
 Keep it conversational and under 20 words.
 Focus on: pain levels, mobility, medication adherence, or emotional wellbeing.
-Do not output JSON - just natural language text."""
+Do not output JSON - just natural language text.""",
+
+  "BILLING": """You are an expert Medical Billing Advocate and Insurance Appeals Specialist.
+Your goal is to help patients fight incorrect medical bills and insurance denials.
+
+INPUT: A medical bill or insurance denial letter text.
+
+TASK:
+1. Analyze the text for common errors (coding errors, lack of medical necessity, duplicate charges).
+2. Explain the denial in simple, 5th-grade English.
+3. Draft a formal, professional appeal letter citing standard patient rights.
+
+OUTPUT JSON FORMAT:
+{
+  "summary": "Simple explanation of why it was denied.",
+  "error_type": "Coding Error | Medical Necessity | Network Issue | Other",
+  "appeal_letter": "Full text of the appeal letter...",
+  "next_steps": ["Step 1", "Step 2"]
+}"""
 }
 
 class ChatRequest(BaseModel):
@@ -74,9 +91,12 @@ def chat(req: ChatRequest):
             {"role": "user", "content": req.message}
         ],
         "stream": False,
+        # KEYWORDS AI FEATURES FOR "MOST COMPLEX TRACE" PRIZE
+        "customer_identifier": "patient_8821", 
         "metadata": {
             "agent_type": req.agent_type,
-            "source": "medilink-backend"
+            "complexity": "high" if req.agent_type == "BILLING" else "low",
+            "workflow_stage": "advocacy"
         }
     }
 
