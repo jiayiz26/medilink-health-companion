@@ -2,7 +2,7 @@
 // Original config/prompts are now handled by the Agent on the backend side theoretically,
 // but for now we are just hitting the backend /chat endpoint which proxies to the Agent.
 
-const BACKEND_URL = "http://127.0.0.1:8000/chat";
+const BACKEND_URL = "http://127.0.0.1:8001/chat";
 
 export async function generateAIResponse(
     messages: { role: string; content: string }[],
