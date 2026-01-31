@@ -65,7 +65,7 @@ def chat(req: ChatRequest):
     system_prompt = SYSTEM_PROMPTS.get(req.agent_type, SYSTEM_PROMPTS["TRIAGE"])
     
     # Model selection - using 1.5 Flash as it is the current stable version
-    model = "gemini-1.5-flash" if req.agent_type == "TRIAGE" else "gemini-1.5-flash"
+    model = "openai/gpt-5-mini" if req.agent_type == "TRIAGE" else "openai/gpt-5-mini"
 
     payload = {
         "model": model, 
