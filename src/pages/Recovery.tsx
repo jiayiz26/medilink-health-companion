@@ -62,7 +62,6 @@ export default function Recovery() {
   const [followUps, setFollowUps] = useState<FollowUp[]>(initialFollowUps);
 
   const handleRespond = async (id: string, response: "positive" | "negative") => {
-    // Update UI immediately
     setFollowUps((prev) =>
       prev.map((fu) =>
         fu.id === id ? { ...fu, responded: true, response } : fu
@@ -70,31 +69,27 @@ export default function Recovery() {
     );
 
     try {
-      // Generate dynamic follow-up using AI
       const previousQuestion = followUps.find(f => f.id === id)?.message;
-      const aiContext = [
-        { role: "assistant", content: previousQuestion || "How are you feeling?" },
-        { role: "user", content: `My response was ${response}.` }
-      ];
-
       const nextQuestion = await generateAIResponse(
-        aiContext,
+        [
+          { role: "assistant", content: previousQuestion || "How are you feeling?" },
+          { role: "user", content: `My response was ${response}.` }
+        ],
         'RECOVERY',
         'demo_patient_recovery'
       );
 
       if (typeof nextQuestion === 'string' && nextQuestion.trim()) {
-        const newFollowUp = {
+        setFollowUps(prev => [{
           id: Date.now().toString(),
           type: "question" as const,
           message: nextQuestion,
           time: "Just now",
           responded: false
-        };
-        setFollowUps(prev => [newFollowUp, ...prev]);
+        }, ...prev]);
       }
     } catch (error) {
-      console.error("Error generating follow-up:", error);
+      console.error("Error:", error);
     }
   };
 

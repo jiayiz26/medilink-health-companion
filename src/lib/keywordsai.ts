@@ -1,6 +1,6 @@
 import { SYSTEM_PROMPTS } from '../config/prompts';
 
-const KEYWORDS_AI_URL = "https://api.keywordsai.co/api/chat/completions";
+const KEYWORDS_AI_URL = "https://api.keywordsai.co/api/v1/chat/completions";
 const API_KEY = import.meta.env.VITE_KEYWORDS_AI_KEY;
 
 export async function generateAIResponse(
@@ -10,6 +10,11 @@ export async function generateAIResponse(
 ) {
     const systemPrompt = SYSTEM_PROMPTS[agentType];
 
+    // CRITICAL: Use Gemini models, not GPT
+    const model = agentType === 'TRIAGE'
+        ? 'gemini-2.5-flash'       // Fast + accurate for triage
+        : 'gemini-flash-latest';    // Cheapest for simple Q&A
+
     try {
         const response = await fetch(KEYWORDS_AI_URL, {
             method: "POST",
@@ -18,7 +23,7 @@ export async function generateAIResponse(
                 "Authorization": `Bearer ${API_KEY}`,
             },
             body: JSON.stringify({
-                model: "gpt-4o-mini",
+                model: model,
                 messages: [
                     { role: "system", content: systemPrompt },
                     ...messages
@@ -30,6 +35,7 @@ export async function generateAIResponse(
                 metadata: {
                     agent_type: agentType,
                     environment: "hackathon_demo",
+                    model_provider: "google",
                     timestamp: new Date().toISOString()
                 }
             }),
@@ -41,7 +47,6 @@ export async function generateAIResponse(
 
         const data = await response.json();
 
-        // Parse JSON for TRIAGE agent
         if (agentType === 'TRIAGE') {
             try {
                 const content = data.choices[0].message.content
@@ -50,10 +55,10 @@ export async function generateAIResponse(
                     .trim();
                 return JSON.parse(content);
             } catch (e) {
-                console.warn("Failed to parse triage JSON, using raw response", e);
+                console.warn("Failed to parse JSON, using fallback", e);
                 return {
                     severity: "routine",
-                    recommendation: "Please consult with a healthcare provider.",
+                    recommendation: "Please consult a healthcare provider.",
                     response: data.choices[0].message.content,
                     suggested_specialty: "General Practice"
                 };
@@ -61,8 +66,9 @@ export async function generateAIResponse(
         }
 
         return data.choices[0].message.content;
+
     } catch (error) {
-        console.error("Keywords AI Error:", error);
+        console.error("AI Error:", error);
         return null;
     }
 }

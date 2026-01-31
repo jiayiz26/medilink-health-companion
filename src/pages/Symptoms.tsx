@@ -96,7 +96,6 @@ export default function Symptoms() {
     setIsTyping(true);
 
     try {
-      // Call Keywords AI Triage Agent
       const response = await generateAIResponse(
         [{ role: "user", content }],
         'TRIAGE',
@@ -106,31 +105,25 @@ export default function Symptoms() {
       setIsTyping(false);
 
       if (response) {
-        const assistantMessage: Message = {
+        setMessages((prev) => [...prev, {
           id: (Date.now() + 1).toString(),
           role: "assistant",
           content: response.response,
-        };
+        }]);
 
-        setMessages((prev) => [...prev, assistantMessage]);
         setTriageResult({
           severity: response.severity,
           recommendation: response.recommendation,
         });
       } else {
-        // Fallback for network errors
         setMessages((prev) => [...prev, {
           id: (Date.now() + 1).toString(),
           role: "assistant",
-          content: "I'm having trouble connecting right now. If this is an emergency, please call 911 immediately."
+          content: "I'm having trouble connecting. If this is an emergency, please call 911."
         }]);
-        setTriageResult({
-          severity: "emergency",
-          recommendation: "Call 911 if this is an emergency"
-        });
       }
     } catch (error) {
-      console.error("Error in symptom analysis:", error);
+      console.error("Error:", error);
       setIsTyping(false);
     }
   };
