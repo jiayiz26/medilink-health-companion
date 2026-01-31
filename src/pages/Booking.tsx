@@ -6,41 +6,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { Check, Calendar as CalendarIcon } from "lucide-react";
 
-const mockDoctors = [
-  {
-    id: "1",
-    name: "Sarah Chen",
-    specialty: "Primary Care",
-    rating: 4.9,
-    reviews: 312,
-    distance: "0.8 mi",
-    nextAvailable: "Today",
-    avatar: "",
-    acceptsInsurance: true,
-  },
-  {
-    id: "2",
-    name: "Michael Rivera",
-    specialty: "Internal Medicine",
-    rating: 4.8,
-    reviews: 245,
-    distance: "1.2 mi",
-    nextAvailable: "Tomorrow",
-    avatar: "",
-    acceptsInsurance: true,
-  },
-  {
-    id: "3",
-    name: "Emily Watson",
-    specialty: "Family Medicine",
-    rating: 4.7,
-    reviews: 189,
-    distance: "2.1 mi",
-    nextAvailable: "Feb 6",
-    avatar: "",
-    acceptsInsurance: false,
-  },
-];
+import { extendedMockDoctors } from "@/lib/mockData";
 
 const timeSlots = [
   "9:00 AM",
@@ -76,7 +42,7 @@ export default function Booking() {
     }
   };
 
-  const selectedDoctorData = mockDoctors.find((d) => d.id === selectedDoctor);
+  const selectedDoctorData = extendedMockDoctors.find((d) => d.id === selectedDoctor);
 
   if (bookingConfirmed && selectedDoctorData) {
     return (
@@ -167,7 +133,7 @@ export default function Booking() {
             Available Doctors
           </h3>
           <div className="space-y-3">
-            {mockDoctors.map((doctor) => (
+            {extendedMockDoctors.map((doctor) => (
               <DoctorCard
                 key={doctor.id}
                 doctor={doctor}
