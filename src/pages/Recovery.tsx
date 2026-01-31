@@ -2,6 +2,7 @@ import { useState } from "react";
 import { FollowUpCard } from "@/components/recovery/FollowUpCard";
 import { Progress } from "@/components/ui/progress";
 import { HeartPulse, TrendingUp, Calendar, Pill } from "lucide-react";
+import { generateAIResponse } from "@/lib/keywordsai";
 
 interface FollowUp {
   id: string;
@@ -60,12 +61,41 @@ const recoveryMilestones = [
 export default function Recovery() {
   const [followUps, setFollowUps] = useState<FollowUp[]>(initialFollowUps);
 
-  const handleRespond = (id: string, response: "positive" | "negative") => {
+  const handleRespond = async (id: string, response: "positive" | "negative") => {
+    // Update UI immediately
     setFollowUps((prev) =>
       prev.map((fu) =>
         fu.id === id ? { ...fu, responded: true, response } : fu
       )
     );
+
+    try {
+      // Generate dynamic follow-up using AI
+      const previousQuestion = followUps.find(f => f.id === id)?.message;
+      const aiContext = [
+        { role: "assistant", content: previousQuestion || "How are you feeling?" },
+        { role: "user", content: `My response was ${response}.` }
+      ];
+
+      const nextQuestion = await generateAIResponse(
+        aiContext,
+        'RECOVERY',
+        'demo_patient_recovery'
+      );
+
+      if (typeof nextQuestion === 'string' && nextQuestion.trim()) {
+        const newFollowUp = {
+          id: Date.now().toString(),
+          type: "question" as const,
+          message: nextQuestion,
+          time: "Just now",
+          responded: false
+        };
+        setFollowUps(prev => [newFollowUp, ...prev]);
+      }
+    } catch (error) {
+      console.error("Error generating follow-up:", error);
+    }
   };
 
   const completedMilestones = recoveryMilestones.filter((m) => m.completed).length;
@@ -102,14 +132,12 @@ export default function Recovery() {
           {recoveryMilestones.map((milestone, index) => (
             <div
               key={index}
-              className={`flex flex-col items-center text-center ${
-                milestone.completed ? "text-success" : "text-muted-foreground"
-              }`}
+              className={`flex flex-col items-center text-center ${milestone.completed ? "text-success" : "text-muted-foreground"
+                }`}
             >
               <div
-                className={`w-3 h-3 rounded-full mb-1 ${
-                  milestone.completed ? "bg-success" : "bg-muted"
-                }`}
+                className={`w-3 h-3 rounded-full mb-1 ${milestone.completed ? "bg-success" : "bg-muted"
+                  }`}
               />
               <span className="hidden sm:block text-xs max-w-[80px]">
                 {milestone.label}

@@ -4,6 +4,8 @@ import { ChatInput } from "@/components/chat/ChatInput";
 import { TriageResult } from "@/components/chat/TriageResult";
 import { Bot, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { generateAIResponse } from "@/lib/keywordsai";
+import { TriageResponse } from "@/types/ai";
 
 interface Message {
   id: string;
@@ -82,30 +84,55 @@ export default function Symptoms() {
   }, [messages, triageResult]);
 
   const handleSend = async (content: string) => {
+    if (!content.trim()) return;
+
     const userMessage: Message = {
       id: Date.now().toString(),
       role: "user",
       content,
     };
+
     setMessages((prev) => [...prev, userMessage]);
     setIsTyping(true);
 
-    // Simulate AI response delay
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      // Call Keywords AI Triage Agent
+      const response = await generateAIResponse(
+        [{ role: "user", content }],
+        'TRIAGE',
+        'demo_patient_123'
+      ) as TriageResponse | null;
 
-    const analysis = analyzeSymptoms(content);
+      setIsTyping(false);
 
-    const assistantMessage: Message = {
-      id: (Date.now() + 1).toString(),
-      role: "assistant",
-      content: analysis.response,
-    };
-    setMessages((prev) => [...prev, assistantMessage]);
-    setTriageResult({
-      severity: analysis.severity,
-      recommendation: analysis.recommendation,
-    });
-    setIsTyping(false);
+      if (response) {
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content: response.response,
+        };
+
+        setMessages((prev) => [...prev, assistantMessage]);
+        setTriageResult({
+          severity: response.severity,
+          recommendation: response.recommendation,
+        });
+      } else {
+        // Fallback for network errors
+        setMessages((prev) => [...prev, {
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content: "I'm having trouble connecting right now. If this is an emergency, please call 911 immediately."
+        }]);
+        setTriageResult({
+          severity: "emergency",
+          recommendation: "Call 911 if this is an emergency"
+        });
+      }
+    } catch (error) {
+      console.error("Error in symptom analysis:", error);
+      setIsTyping(false);
+    }
   };
 
   return (
