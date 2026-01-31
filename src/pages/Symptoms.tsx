@@ -75,6 +75,7 @@ export default function Symptoms() {
   const [triageResult, setTriageResult] = useState<{
     severity: "emergency" | "urgent" | "routine";
     recommendation: string;
+    suggested_specialty?: string;
   } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -111,10 +112,16 @@ export default function Symptoms() {
           content: response.response,
         }]);
 
-        setTriageResult({
+        const newResult = {
           severity: response.severity,
           recommendation: response.recommendation,
-        });
+          suggested_specialty: response.suggested_specialty, // Ensure this is captured
+          timestamp: Date.now()
+        };
+
+        setTriageResult(newResult);
+        // Save for Dashboard Pulse
+        localStorage.setItem("latestTriage", JSON.stringify(newResult));
       } else {
         setMessages((prev) => [...prev, {
           id: (Date.now() + 1).toString(),
@@ -173,7 +180,13 @@ export default function Symptoms() {
           <TriageResult
             severity={triageResult.severity}
             recommendation={triageResult.recommendation}
-            onBookAppointment={() => navigate("/booking")}
+            onBookAppointment={() => {
+              // FEATURE 1: Continuity Link - Pre-fill specialty
+              const specialtyParam = triageResult.suggested_specialty
+                ? `?specialty=${encodeURIComponent(triageResult.suggested_specialty)}`
+                : "";
+              navigate("/booking" + specialtyParam);
+            }}
           />
         )}
 

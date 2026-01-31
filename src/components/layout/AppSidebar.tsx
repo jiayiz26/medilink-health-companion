@@ -105,6 +105,20 @@ export function AppSidebar() {
             {!isCollapsed && <span className="ml-2">Collapse</span>}
           </Button>
         </div>
+        {/* FEATURE 3: Confidential Badge */}
+        <div className="mt-auto p-4 border-t border-sidebar-border">
+          <div className="bg-sidebar-primary/5 rounded-lg p-3 flex items-center gap-3">
+            <div className="h-8 w-8 rounded-full bg-green-500/10 flex items-center justify-center">
+              <Shield className="h-4 w-4 text-green-600 dark:text-green-400" />
+            </div>
+            {!isCollapsed && (
+              <div>
+                <p className="text-xs font-bold text-sidebar-foreground">HIPAA Compliant</p>
+                <p className="text-[10px] text-muted-foreground">End-to-End Encrypted</p>
+              </div>
+            )}
+          </div>
+        </div>
       </aside>
 
       {/* Spacer for content */}
