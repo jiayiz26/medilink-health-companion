@@ -26,3 +26,6 @@ dist-ssr
 # Environment variables
 .env
 backend/.env
+
+# Large Assets
+FInal Video/
