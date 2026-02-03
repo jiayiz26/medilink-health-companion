@@ -4,7 +4,7 @@ import { ChatInput } from "@/components/chat/ChatInput";
 import { TriageResult } from "@/components/chat/TriageResult";
 import { Bot, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { generateAIResponse } from "@/lib/keywordsai";
+import { generateAIResponse } from "@/lib/aiService";
 import { TriageResponse } from "@/types/ai";
 
 interface Message {
