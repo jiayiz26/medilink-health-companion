@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { getBackendClient } from "@/lib/backendClient";
 
 export async function generateAIResponse(
   messages: { role: string; content: string }[],
@@ -9,6 +9,7 @@ export async function generateAIResponse(
   const messageContent = lastMessage?.content || "";
 
   try {
+    const supabase = getBackendClient();
     const { data, error } = await supabase.functions.invoke('chat', {
       body: {
         message: messageContent,
