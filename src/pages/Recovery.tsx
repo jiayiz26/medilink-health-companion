@@ -2,7 +2,7 @@ import { useState } from "react";
 import { FollowUpCard } from "@/components/recovery/FollowUpCard";
 import { Progress } from "@/components/ui/progress";
 import { HeartPulse, TrendingUp, Calendar, Pill } from "lucide-react";
-import { generateAIResponse } from "@/lib/keywordsai";
+import { generateAIResponse } from "@/lib/aiService";
 
 interface FollowUp {
   id: string;
