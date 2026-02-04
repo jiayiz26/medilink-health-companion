@@ -1,4 +1,6 @@
-import { getBackendClient } from "@/lib/backendClient";
+// Direct fetch to Edge Function - more reliable than Supabase client in preview environments
+const SUPABASE_URL = "https://jnriouxzlodzdpjtjano.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpucmlvdXh6bG9kemRwanRqYW5vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwODMxNzEsImV4cCI6MjA4NTY1OTE3MX0.BS_Zbzhsl_rkY-Hd30eP2Bih9ARCXZTJzOgFasb5Ics";
 
 export async function generateAIResponse(
   messages: { role: string; content: string }[],
@@ -9,19 +11,25 @@ export async function generateAIResponse(
   const messageContent = lastMessage?.content || "";
 
   try {
-    const supabase = getBackendClient();
-    const { data, error } = await supabase.functions.invoke('chat', {
-      body: {
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/chat`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'apikey': SUPABASE_ANON_KEY,
+      },
+      body: JSON.stringify({
         message: messageContent,
         agent_type: agentType
-      }
+      })
     });
 
-    if (error) {
-      console.error("Edge function error:", error);
+    if (!response.ok) {
+      console.error("Edge function error:", response.status, await response.text());
       return null;
     }
 
+    const data = await response.json();
     const reply = data?.reply;
 
     if (!reply) {
