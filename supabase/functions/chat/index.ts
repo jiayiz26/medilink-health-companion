@@ -61,6 +61,14 @@ serve(async (req) => {
   try {
     const KEYWORDS_API_KEY = Deno.env.get("KEYWORDS_API_KEY");
     
+    // Debug: Log partial key for verification (first 3 + last 3 chars)
+    if (KEYWORDS_API_KEY) {
+      const masked = `${KEYWORDS_API_KEY.slice(0, 3)}...${KEYWORDS_API_KEY.slice(-3)}`;
+      console.log(`[DEBUG] KEYWORDS_API_KEY present: ${masked}`);
+    } else {
+      console.log("[DEBUG] KEYWORDS_API_KEY is EMPTY or undefined");
+    }
+    
     if (!KEYWORDS_API_KEY) {
       return new Response(
         JSON.stringify({ error: "API key not configured" }),
